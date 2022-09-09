@@ -1,6 +1,5 @@
 const User = require("../../../models/db/user");
 const UserSocket = require("../../../models/usersocket");
-const Auth = require("../../../models/auth");
 
 module.exports = (socket, event) => {
   socket.on(event, async () => {

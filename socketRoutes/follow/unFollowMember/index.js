@@ -1,5 +1,4 @@
 const User = require("../../../models/db/user");
-const Auth = require("../../../models/auth");
 
 module.exports = (socket, event) => {
   socket.on(event, async (friendId) => {

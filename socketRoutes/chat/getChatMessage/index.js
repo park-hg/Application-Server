@@ -1,5 +1,4 @@
 const Chat = require("../../../models/chat");
-const Auth = require("../../../models/auth");
 
 module.exports = (socket, event) => {
   socket.on(event, async (receiver) => {

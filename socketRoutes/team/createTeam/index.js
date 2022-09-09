@@ -1,6 +1,5 @@
 const teamGameRoom = require("../../../models/teamroom");
 const uuid = require("uuid");
-const Auth = require("../../../models/auth");
 
 module.exports = (socket, event) => {
   socket.on(event, async () => {

@@ -1,7 +1,5 @@
 const teamGameRoom = require("../../../models/teamroom");
 const GameRoom = require("../../../models/gameroom");
-const Interval = require("../../../models/interval");
-const Auth = require("../../../models/auth");
 
 /* event: exitWait */
 module.exports = (socket, event) => {
@@ -20,7 +18,6 @@ module.exports = (socket, event) => {
       const gitId = socket.userInfo.gitId;
       // mode: solo
       if (myRoom?.includes("room")) {
-        console.log('delete', gitId);
         GameRoom.deletePlayer(socket, gitId);
         GameRoom.deletePrevRoom(gitId);
         if (GameRoom.room[myRoom?.slice(4)] !== undefined) {
@@ -50,8 +47,8 @@ module.exports = (socket, event) => {
 
           else {
             GameRoom.deletePlayer(socket, gitId);
-            if (GameRoom.room[myRoom.slice(4)] !== undefined) {
-              socket.to(myRoom).emit(event, GameRoom.room[myRoom[4]].players);
+            if (GameRoom.room[myRoom?.slice(4)] !== undefined) {
+              socket.to(myRoom).emit(event, GameRoom.room[myRoom?.slice(4)].players);
             }
           }
         }
