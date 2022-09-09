@@ -1,6 +1,5 @@
 const GameRoom = require("../../../models/gameroom");
 const GameLog = require("../../../models/db/gamelog");
-const Auth = require("../../../models/auth");
 
 module.exports = (socket, event) => {
   socket.on(event, async (id) => {

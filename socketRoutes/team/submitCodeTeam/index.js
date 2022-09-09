@@ -1,6 +1,5 @@
 const teamGameRoom = require("../../../models/teamroom");
 const GameLog = require("../../../models/db/gamelog");
-const Auth = require("../../../models/auth");
 
 module.exports = (socket, event) => {
   //팀전에서 게임 제출

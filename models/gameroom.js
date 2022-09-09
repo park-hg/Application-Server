@@ -21,7 +21,6 @@ function setRoom(roomInfo) {
 }
 
 function createRoom(userInfo, prevIdx, prevStatus) {
-  console.log('prev idx', prevIdx);
   if (prevIdx !== undefined) {
     room[prevIdx] = {
       players: [userInfo],
@@ -31,27 +30,24 @@ function createRoom(userInfo, prevIdx, prevStatus) {
     if (room[idx]?.status === 'playing') {
       idx++;
     }
-    console.log('room created', room);
     room[idx] = {
       players: [userInfo],
       status: 'waiting'
     }
     waitIdices.add(idx);
-
-    console.log('room created', room);
   }
-
 }
 
 function deletePlayer(socket, userName, delay) {
   try {
     const myRoom = getRoom(socket.rooms);
     if (myRoom !== undefined) {
+
       const idx = myRoom.slice(4);
-      console.log('solo room ', idx, room, room[idx]);
       room[idx].players = room[idx].players.filter(item => item.gitId !== userName);
   
       if (room[idx].players.length === 0) {
+
         if (room[idx].status === 'waiting') Interval.deleteInterval(myRoom, 'wait');
         else if (room[idx].status === 'playing') Interval.deleteInterval(myRoom, 'solo');
         if (delay === undefined) delete room[idx];
@@ -92,16 +88,12 @@ function joinRoom(userInfo, to_idx) {
   }
 }
 
-
 function getStatus(idx) {
   return room[idx].status;
 }
 
-
 function setStatus(idx, status) {
-  console.log('set status', room, idx, status);
   room[idx].status = status;
-
 }
 
 function increaseIdx() {
@@ -128,7 +120,6 @@ function deletePrevRoom(gitId) {
     delete prevRoom[gitId];
   }
 }
-
 
 module.exports = {
   room,

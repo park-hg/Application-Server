@@ -2,7 +2,6 @@ const teamGameRoom = require("../../../models/teamroom");
 const User = require("../../../models/db/user");
 const GameLog = require("../../../models/db/gamelog");
 const Interval = require("../../../models/interval");
-const Auth = require("../../../models/auth");
 
 module.exports = (socket, event) => {
   socket.on(event, async () => {

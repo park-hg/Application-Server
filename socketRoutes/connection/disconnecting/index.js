@@ -1,5 +1,4 @@
 const User = require("../../../models/db/user");
-const Auth = require("../../../models/auth");
 const GameRoom = require("../../../models/gameroom");
 const TeamRoom = require("../../../models/teamroom");
 const UserSocket = require("../../../models/usersocket");
@@ -7,7 +6,6 @@ const UserSocket = require("../../../models/usersocket");
 module.exports = async (socket, event) => {
   await socket.on(event, async () => {
     // disconnected when solo play
-    // console.log('disconnecting', socket.token);
     // calling socket.rooms in try&catch yields UNDEFINED ROOM!!!
     const socketrooms = socket.rooms;
     try {

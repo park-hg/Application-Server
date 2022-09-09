@@ -1,8 +1,6 @@
-// const { json } = require('express');
 const fetch = require('node-fetch');
 const User = require('../../../models/db/user');
 const jwt = require('jsonwebtoken');
-
 require("dotenv").config();
 
 const SECRETKEY = process.env.JWT_SECRET;
@@ -14,14 +12,13 @@ const cookieConfig = {
   // secure: true,
 }
 
-async function getGithubUser (access_token) {
+async function getGithubUser(access_token) {
   const req = await fetch('https://api.github.com/user', {
     headers: {
       Authorization: `bearer ${access_token}`
     }
   })
   const data = await req.json()
-  console.log(data);
   return data
 }
 
@@ -59,8 +56,9 @@ exports.getGitInfo = async(req, res) => {
         }
       )
 
-      res.cookie('jwt', result, cookieConfig);
       res.cookie('myId', user._id, cookieConfig);
+      res.cookie('jwt', result, cookieConfig);
+      res.cookie('refreshToken', token);
       res.status(200).json({ success: true });
     } catch(err) {
       console.log(err);

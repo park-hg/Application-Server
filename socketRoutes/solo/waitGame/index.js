@@ -1,6 +1,5 @@
 const GameRoom = require("../../../models/gameroom");
 const Interval = require("../../../models/interval");
-const Auth = require("../../../models/auth");
 
 // waitGame
 module.exports = (socket, event) => {
