@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+router.use('/login', require('./login'));
 router.use('/judge', require('./judge'));
 router.use('/user',  require('./user'));
 router.use('/gamelog', require('./gamelog'));

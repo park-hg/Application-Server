@@ -3,20 +3,24 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const db = require("./lib/db");
+
+const Auth = require("./models/auth");
 const SocketRoutes = require("./socketRoutes");
 
 const app = express();
 const SocketIO = require("socket.io");
+
 const server = http.createServer(app);
+
+const PORTNUM = 3000;
+
 const io = SocketIO(server, {
   cors: {
     origin: process.env.ORIGIN,
   },
 });
 
-const PORTNUM = 3000;
 
-// https://m.blog.naver.com/psj9102/221282415870
 db.connect();
 app.use(cors({
   origin: process.env.ORIGIN,
@@ -27,18 +31,19 @@ app.use(express.json());
 app.use("/", require("./routes/"));
 
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const token = socket.handshake.auth.token;
-  if (token !== undefined && socket.jwt === undefined) {
-    socket.token = token;
+  const payload = await Auth.verify(token);
+  if (!payload) {
+    return next(new Error('Authentication error'));
   }
+  socket.userInfo = payload;
   next();
 })
 io.on("connection", (socket) => {
   socket.onAny(e => {
     console.log(`SOCKET EVENT::::::${e}`);
   });
-
   // Connection
   SocketRoutes.connection.setGitId(socket, SocketRoutes.connection.event.setGitId);
   SocketRoutes.connection.disconnecting(socket, SocketRoutes.connection.event.disconnecting);
