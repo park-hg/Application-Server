@@ -10,6 +10,7 @@ const ISSUER = process.env.ISSUER;
 const cookieConfig = { 
   maxAge: 60 * 60 * 2 * 1000,
   // secure: true,
+  httpOnly: true,
 }
 
 async function getGithubUser(access_token) {
@@ -58,8 +59,10 @@ exports.getGitInfo = async(req, res) => {
 
       res.cookie('myId', user._id, cookieConfig);
       res.cookie('jwt', result, cookieConfig);
-      res.cookie('refreshToken', token);
+      res.cookie('refreshToken', token, cookieConfig);
       res.status(200).json({ success: true });
+      res.end();
+      // console.log('res', res);
     } catch(err) {
       console.log(err);
       res.status(409).json({

@@ -48,41 +48,42 @@ const lambda = new AWS.Lambda({
 
 exports.judgeLambda = async function (req, res) {
   try {
-    console.log("lambda :::: start");
+    await sendCode(req, res);
+    // console.log("lambda :::: start");
 
-    let fileName = "";
-    let body;
+    // let fileName = "";
+    // let body;
 
-    if (req.body["submit"] === true) {
-      fileName = await s3.uploadFile(req.body);
-      body = {
-        submit: true,
-        fileName: fileName,
-        problemId: req.body["problemId"],
-      };
-    } else {
-      body = {
-        submit: false,
-        code: req.body["code"],
-        fileName: `${req.body["gameLogId"]}_${req.body["gitId"]}`,
-        problemId: req.body["problemId"],
-      };
-    }
+    // if (req.body["submit"] === true) {
+    //   fileName = await s3.uploadFile(req.body);
+    //   body = {
+    //     submit: true,
+    //     fileName: fileName,
+    //     problemId: req.body["problemId"],
+    //   };
+    // } else {
+    //   body = {
+    //     submit: false,
+    //     code: req.body["code"],
+    //     fileName: `${req.body["gameLogId"]}_${req.body["gitId"]}`,
+    //     problemId: req.body["problemId"],
+    //   };
+    // }
 
-    const judgeFunction =
-      req.body["language"] === "JavaScript" ? judgeJS : judgePY;
+    // const judgeFunction =
+    //   req.body["language"] === "JavaScript" ? judgeJS : judgePY;
 
-    const params = {
-      FunctionName: judgeFunction,
-      Payload: JSON.stringify(body),
-    };
+    // const params = {
+    //   FunctionName: judgeFunction,
+    //   Payload: JSON.stringify(body),
+    // };
 
-    const data = await lambda.invoke(params).promise();
-    const returnValue = JSON.parse(JSON.parse(data["Payload"])["body"]);
-    console.log("Send result to Client");
-    res.status(200).json(returnValue);
+    // const data = await lambda.invoke(params).promise();
+    // const returnValue = JSON.parse(JSON.parse(data["Payload"])["body"]);
+    // console.log("Send result to Client");
+    // res.status(200).json(returnValue);
   } catch (error) {
     console.log("[ERROR][judgeLambda] resend request to JudgeServer");
-    await sendCode(req, res);
+    // await sendCode(req, res);
   }
 };

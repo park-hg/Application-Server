@@ -5,6 +5,11 @@ const SECRETKEY = process.env.JWT_SECRET;
 const EXPIRESIN = process.env.EXPIRESIN;
 const ISSUER = process.env.ISSUER;
 
+const cookieConfig = {
+  httpOnly: true,
+  // secure: true
+}
+
 async function getGithubUser(access_token) {
   const req = await fetch('https://api.github.com/user', {
     headers: {
@@ -21,7 +26,7 @@ module.exports = async (req, res, next) => {
     return next();
   } catch(e) {
     if (e.name === 'TokenExpiredError') {
-      // github access token을 refresh token으로 사용(유효시간 8시간).
+      // github access token을 refresh token으로 사용(유효시간 무제한).
       const githubData = getGithubUser(res.cookies.refreshToken);
       if (githubData) {
 
