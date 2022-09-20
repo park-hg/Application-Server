@@ -1,52 +1,44 @@
 const http = require("http");
 const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const cookie = require("cookie");
-const db = require("./lib/db");
-
-const Auth = require("./models/auth");
-const SocketRoutes = require("./socketRoutes");
-
 const app = express();
-const SocketIO = require("socket.io");
-
 const server = http.createServer(app);
+const db = require("./lib/db");
+const cookie = require("cookie");
+const cookieParser = require("cookie-parser");
+const Auth = require("./models/auth");
+const SocketIO = require("socket.io");
+const SocketRoutes = require("./socketRoutes");
 
 const PORTNUM = 3000;
 
-const io = SocketIO(server);
-
-
 db.connect();
-app.use(cors({
-  origin: process.env.ORIGIN,
-  method: ["GET", "POST"],
-}));
+
+const io = SocketIO(server, {
+  cors: {
+    origin: process.env.ORIGIN,
+    credentials: true,
+  }
+});
+
+
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
 app.use("/", require("./routes/"));
 
 
-io.engine.on("initial_headers", (headers, req) => {
-  headers["Access-Control-Allow-Origin"] = process.env.ORIGIN;
-  headers["Access-Control-Allow-Credentials"] = true;
-});
-
-io.engine.on("headers", (headers, req) => {
-  headers["Access-Control-Allow-Origin"] = process.env.ORIGIN;
-  headers["Access-Control-Allow-Credentials"] = true;
-});
-
 io.use(async (socket, next) => {
-  const cookies = cookie.parse(socket.handshake.headers.cookie);
-  const token = cookies['jwt'];
-  const payload = await Auth.verify(token);
-  if (!payload) {
-    return next(new Error('Authentication error'));
+  try {
+    const cookies = cookie.parse(socket.request.headers?.cookie);
+    const token = cookies['jwt'];
+    const payload = await Auth.verify(token);
+    if (!payload) {
+      return next(new Error('Authentication error'));
+    }
+    socket.userInfo = payload;
+    next();
+  } catch(e) {
+    console.log(e);
   }
-  socket.userInfo = payload;
-  next();
 })
 
 io.on("connection", (socket) => {
