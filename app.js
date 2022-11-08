@@ -1,45 +1,56 @@
 const http = require("http");
 const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const db = require("./lib/db");
-const SocketRoutes = require("./socketRoutes");
-
 const app = express();
-const SocketIO = require("socket.io");
 const server = http.createServer(app);
-const io = SocketIO(server, {
-  cors: {
-    origin: process.env.ORIGIN,
-  },
-});
+const db = require("./lib/db");
+const cookie = require("cookie");
+const cookieParser = require("cookie-parser");
+const Auth = require("./models/auth");
+const SocketIO = require("socket.io");
+const SocketRoutes = require("./socketRoutes");
 
 const PORTNUM = 3000;
 
 db.connect();
+
+const io = SocketIO(server, {
+  cors: {
+    origin: process.env.ORIGIN,
+    credentials: true,
+  }
+});
+
+
 
 // no need
 // app.use(cors({
 //   origin: process.env.ORIGIN,
 //   method: ["GET", "POST"],
 // }));
+
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
 app.use("/", require("./routes/"));
 
-
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-  if (token !== undefined && socket.jwt === undefined) {
-    socket.token = token;
+io.use(async (socket, next) => {
+  try {
+    const cookies = cookie.parse(socket.request.headers?.cookie);
+    const token = cookies['jwt'];
+    const payload = await Auth.verify(token);
+    if (!payload) {
+      return next(new Error('Authentication error'));
+    }
+    socket.userInfo = payload;
+    next();
+  } catch(e) {
+    console.log(e);
   }
-  next();
 })
+
 io.on("connection", (socket) => {
   socket.onAny(e => {
     console.log(`SOCKET EVENT::::::${e}`);
   });
-
   // Connection
   SocketRoutes.connection.setGitId(socket, SocketRoutes.connection.event.setGitId);
   SocketRoutes.connection.disconnecting(socket, SocketRoutes.connection.event.disconnecting);

@@ -4,7 +4,7 @@ let idx = 0;
 const room = {};
 const prevRoom = {};
 const waitIdices = new Set();
-/* room status: waiting, playing, full */
+/* room status: waiting, playing */
 
 function getRoom(rooms) {
   for (let room of rooms) {
@@ -20,25 +20,34 @@ function setRoom(roomInfo) {
   }
 }
 
-function createRoom(userInfo) {
-  if (room[idx]?.status === 'playing') {
-    idx++;
+function createRoom(userInfo, prevIdx, prevStatus) {
+  if (prevIdx !== undefined) {
+    room[prevIdx] = {
+      players: [userInfo],
+      status: prevStatus
+    }
+  } else {
+    if (room[idx]?.status === 'playing') {
+      idx++;
+    }
+    room[idx] = {
+      players: [userInfo],
+      status: 'waiting'
+    }
+    waitIdices.add(idx);
   }
-  room[idx] = {
-    players: [userInfo],
-    status: 'waiting'
-  }
-  waitIdices.add(idx);
 }
 
 function deletePlayer(socket, userName, delay) {
   try {
     const myRoom = getRoom(socket.rooms);
     if (myRoom !== undefined) {
+
       const idx = myRoom.slice(4);
       room[idx].players = room[idx].players.filter(item => item.gitId !== userName);
   
       if (room[idx].players.length === 0) {
+
         if (room[idx].status === 'waiting') Interval.deleteInterval(myRoom, 'wait');
         else if (room[idx].status === 'playing') Interval.deleteInterval(myRoom, 'solo');
         if (delay === undefined) delete room[idx];
@@ -66,20 +75,22 @@ function filterRoom(idx) {
   }
 }
 
-function joinRoom(userInfo) {
+function joinRoom(userInfo, to_idx) {
   try {
-    room[idx].players.push(userInfo);
+    if (to_idx !== undefined) {
+      room[idx].players.push(userInfo);
+    } else {
+      room[to_idx].players.push(userInfo);
+    }
   }
   catch(e) {
     console.log(e);
   }
 }
 
-
 function getStatus(idx) {
   return room[idx].status;
 }
-
 
 function setStatus(idx, status) {
   room[idx].status = status;
@@ -99,7 +110,9 @@ function getPrevRoom(gitId) {
 }
 
 function setPrevRoom(gitId, socketrooms) {
-  prevRoom[gitId] = getRoom(socketrooms);
+  const prevIdx = getRoom(socketrooms).slice(4);
+  const prevStatus = room[prevIdx].status;
+  prevRoom[gitId] = {prevIdx, prevStatus};
 }
 
 function deletePrevRoom(gitId) {
@@ -107,7 +120,6 @@ function deletePrevRoom(gitId) {
     delete prevRoom[gitId];
   }
 }
-
 
 module.exports = {
   room,

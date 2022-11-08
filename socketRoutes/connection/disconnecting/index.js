@@ -1,5 +1,4 @@
 const User = require("../../../models/db/user");
-const Auth = require("../../../models/auth");
 const GameRoom = require("../../../models/gameroom");
 const TeamRoom = require("../../../models/teamroom");
 const UserSocket = require("../../../models/usersocket");
@@ -10,33 +9,26 @@ module.exports = async (socket, event) => {
     // calling socket.rooms in try&catch yields UNDEFINED ROOM!!!
     const socketrooms = socket.rooms;
     try {
-      const userInfo = await Auth.verify(socket.token);
-      if (userInfo !== false) {
-        if (socket.mode === 'solo') {
-          GameRoom.setPrevRoom(socket.gitId, socketrooms);
-          // console.log("before disconnecting ", GameRoom.prevRoom);
-          GameRoom.deletePlayer(socket, socket.gitId);
-          // console.log("after disconnecting ", GameRoom.prevRoom);
+      if (socket.mode === 'solo') {
+        GameRoom.setPrevRoom(socket.userInfo.gitId, socketrooms);
+        GameRoom.deletePlayer(socket, socket.userInfo.gitId);
 
-        }
-        else if (socket.mode === 'team') {
-          TeamRoom.setPrevRoom(socket);
-          // console.log("before!!!!! disconnecting", TeamRoom.teamRoom);
-          TeamRoom.deletePlayer(socket.bangjang, socket.gitId);
-          // console.log("after!!!!! disconnecting", TeamRoom.teamRoom);
-        }
+      }
+      else if (socket.mode === 'team') {
+        TeamRoom.setPrevRoom(socket);
+        TeamRoom.deletePlayer(socket.bangjang, socket.userInfo.gitId);
+      }
 
-        if (socket.id !== undefined) {
-          const followerList = await User.getFollowerList(userInfo.userId);
-          UserSocket.deleteSocketId(socket?.gitId)
-  
-          if (followerList !== undefined) {
-            await Promise.all (followerList?.filter(friend => {
-              if (UserSocket.isExist(friend)) {
-                socket.to(UserSocket.getSocketId(friend)).emit("followingUserDisconnect", socket?.gitId);
-              }
-            }));
-          }
+      if (socket.id !== undefined) {
+        const followerList = await User.getFollowerList(socket.userInfo.userId);
+        UserSocket.deleteSocketId(socket?.userInfo?.gitId)
+
+        if (followerList !== undefined) {
+          await Promise.all (followerList?.filter(friend => {
+            if (UserSocket.isExist(friend)) {
+              socket.to(UserSocket.getSocketId(friend)).emit("followingUserDisconnect", socket?.userInfo?.gitId);
+            }
+          }));
         }
       }
     } catch(e) {
