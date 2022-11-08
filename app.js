@@ -21,10 +21,16 @@ const io = SocketIO(server, {
 });
 
 
+
+// no need
+// app.use(cors({
+//   origin: process.env.ORIGIN,
+//   method: ["GET", "POST"],
+// }));
+
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
 app.use("/", require("./routes/"));
-
 
 io.use(async (socket, next) => {
   try {
